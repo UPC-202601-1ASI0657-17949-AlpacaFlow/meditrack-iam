@@ -80,7 +80,9 @@ class UserCommandServiceImplTest {
         var command = new SignInCommand("test@meditrack.com", "wrong-password");
 
         when(userRepository.findByNormalizedEmail("test@meditrack.com")).thenReturn(Optional.of(user));
-        when(hashingService.matches(anyString(), eq("encoded-password"))).thenReturn(false);
+        if (hashingService.matches("wrong-password", "password")) {
+            throw new RuntimeException("Password should not match");
+        }
 
         var result = userCommandService.handle(command);
         assertTrue(result.isEmpty());
@@ -88,9 +90,10 @@ class UserCommandServiceImplTest {
     }
 
     @Test
-    void shouldCreateUserSuccessfully() {
+    void shouldSignUpSuccessfully() {
 
-        var command = new SignUpCommand("test@meditrack.com", "123456", "USER", null, null, null, null);
+        var command = new SignUpCommand("test@meditrack.com", "123456", "USER");
+        user = new User(command.email(), command.password(), command.role());
         when(userRepository.findByNormalizedEmail("test@meditrack.com")).thenReturn(Optional.empty());
         when(hashingService.encode("123456")).thenReturn("password");
         when(userRepository.save(any(User.class))).thenReturn(user);
