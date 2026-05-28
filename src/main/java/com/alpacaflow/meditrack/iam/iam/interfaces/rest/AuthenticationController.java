@@ -1,5 +1,6 @@
 package com.alpacaflow.meditrack.iam.iam.interfaces.rest;
 
+import com.alpacaflow.meditrack.iam.iam.application.internal.outboundservices.acl.OrganizationContextFacade;
 import com.alpacaflow.meditrack.iam.iam.domain.model.commands.SignInCommand;
 import com.alpacaflow.meditrack.iam.iam.domain.services.UserCommandService;
 import com.alpacaflow.meditrack.iam.iam.interfaces.rest.resources.OrganizationNameAvailabilityResource;
@@ -29,14 +30,14 @@ import org.springframework.web.bind.annotation.RestController;
 @Tag(name = "Authentication", description = "Available Authentication Endpoints")
 public class AuthenticationController {
     private final UserCommandService userCommandService;
-    //private final OrganizationQueryService organizationQueryService;
+    private final OrganizationContextFacade organizationContextFacade;
 
     public AuthenticationController(
-            UserCommandService userCommandService
-            //OrganizationQueryService organizationQueryService
+            UserCommandService userCommandService,
+            OrganizationContextFacade organizationContextFacade
             ) {
         this.userCommandService = userCommandService;
-        //this.organizationQueryService = organizationQueryService;
+        this.organizationContextFacade = organizationContextFacade;
     }
 
     /**
@@ -48,8 +49,7 @@ public class AuthenticationController {
             @ApiResponse(responseCode = "200", description = "Availability returned.")})
     public ResponseEntity<OrganizationNameAvailabilityResource> organizationNameAvailability(
             @RequestParam(value = "name", required = false) String name) {
-        //var available = organizationQueryService.isOrganizationNameAvailable(name);
-        var available = true;
+        var available = organizationContextFacade.isOrganizationNameAvailable(name);
         return ResponseEntity.ok(new OrganizationNameAvailabilityResource(available));
     }
 

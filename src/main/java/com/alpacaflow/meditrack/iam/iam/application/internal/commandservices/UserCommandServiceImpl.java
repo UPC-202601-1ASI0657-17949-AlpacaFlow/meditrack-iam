@@ -1,5 +1,6 @@
 package com.alpacaflow.meditrack.iam.iam.application.internal.commandservices;
 
+import com.alpacaflow.meditrack.iam.iam.application.internal.outboundservices.acl.OrganizationContextFacade;
 import com.alpacaflow.meditrack.iam.iam.application.internal.outboundservices.hashing.HashingService;
 import com.alpacaflow.meditrack.iam.iam.application.internal.outboundservices.tokens.TokenService;
 import com.alpacaflow.meditrack.iam.iam.domain.model.aggregates.User;
@@ -32,8 +33,7 @@ public class UserCommandServiceImpl implements UserCommandService {
     private final UserRepository userRepository;
     private final HashingService hashingService;
     private final TokenService tokenService;
-    //private final OrganizationCommandService organizationCommandService;
-    //private final AdminCommandService adminCommandService;
+    private final OrganizationContextFacade organizationContextFacade;
 
     /**
      * Constructor of the class.
@@ -46,15 +46,13 @@ public class UserCommandServiceImpl implements UserCommandService {
     public UserCommandServiceImpl(
             UserRepository userRepository, 
             HashingService hashingService, 
-            TokenService tokenService
-            //@Lazy OrganizationCommandService organizationCommandService,
-            //@Lazy AdminCommandService adminCommandService
+            TokenService tokenService,
+            OrganizationContextFacade organizationContextFacade
             ) {
         this.userRepository = userRepository;
         this.hashingService = hashingService;
         this.tokenService = tokenService;
-        //this.organizationCommandService = organizationCommandService;
-        //this.adminCommandService = adminCommandService;
+        this.organizationContextFacade = organizationContextFacade;
     }
 
     /**
@@ -119,22 +117,18 @@ public class UserCommandServiceImpl implements UserCommandService {
             if (command.organizationType() == null || command.organizationType().isBlank()) {
                 throw new RuntimeException("Organization type is required for admin sign-up");
             }
-            
-            // Create organization
-            //var createOrgCommand = new CreateOrganizationCommand(
-            //        command.organizationName(),
-            //        command.organizationType()
-            //);
-            //var organizationId = organizationCommandService.handle(createOrgCommand);
-            
-            // Create admin linked to the organization and user
-            //var createAdminCommand = new CreateAdminCommand(
-            //        organizationId,
-            //        savedUser.getId(),
-            //        command.firstName(),
-            //        command.lastName()
-            //);
-            //adminCommandService.handle(createAdminCommand);
+
+            var remoteOrganizationId = organizationContextFacade.createOrganizationWithAdmin(
+                    command.organizationName(),
+                    command.organizationType(),
+                    savedUser.getId(),
+                    command.firstName(),
+                    command.lastName()
+            );
+
+            if (remoteOrganizationId == null || remoteOrganizationId <= 0) {
+                throw new RuntimeException("Failed to register the organization in the remote context. Rolling back transaction.");
+            }
         }
         
         return Optional.of(savedUser);
