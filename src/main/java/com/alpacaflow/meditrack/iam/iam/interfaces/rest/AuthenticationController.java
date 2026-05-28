@@ -30,27 +30,11 @@ import org.springframework.web.bind.annotation.RestController;
 @Tag(name = "Authentication", description = "Available Authentication Endpoints")
 public class AuthenticationController {
     private final UserCommandService userCommandService;
-    private final OrganizationContextFacade organizationContextFacade;
 
     public AuthenticationController(
-            UserCommandService userCommandService,
-            OrganizationContextFacade organizationContextFacade
+            UserCommandService userCommandService
             ) {
         this.userCommandService = userCommandService;
-        this.organizationContextFacade = organizationContextFacade;
-    }
-
-    /**
-     * Public check used during admin (clinic/residence) registration: whether an organization name is still free.
-     */
-    @GetMapping("/organization-name-availability")
-    @Operation(summary = "Organization name availability", description = "Returns whether the proposed organization name is available (case-insensitive).")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Availability returned.")})
-    public ResponseEntity<OrganizationNameAvailabilityResource> organizationNameAvailability(
-            @RequestParam(value = "name", required = false) String name) {
-        var available = organizationContextFacade.isOrganizationNameAvailable(name);
-        return ResponseEntity.ok(new OrganizationNameAvailabilityResource(available));
     }
 
     @PostMapping("/sign-in")
