@@ -118,17 +118,12 @@ public class UserCommandServiceImpl implements UserCommandService {
                 throw new RuntimeException("Organization type is required for admin sign-up");
             }
 
-            var remoteOrganizationId = organizationContextFacade.createOrganizationWithAdmin(
+            organizationContextFacade.createOrganization(
                     command.organizationName(),
                     command.organizationType(),
-                    savedUser.getId(),
-                    command.firstName(),
-                    command.lastName()
+                    command.email()
             );
 
-            if (remoteOrganizationId == null || remoteOrganizationId <= 0) {
-                throw new RuntimeException("Failed to register the organization in the remote context. Rolling back transaction.");
-            }
         }
         
         return Optional.of(savedUser);

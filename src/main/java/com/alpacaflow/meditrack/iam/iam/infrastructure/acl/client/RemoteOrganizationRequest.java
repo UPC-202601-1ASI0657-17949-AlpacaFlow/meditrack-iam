@@ -8,10 +8,8 @@ package com.alpacaflow.meditrack.iam.iam.infrastructure.acl.client;
  * una institución junto con su cuenta administradora de forma atómica.
  */
 public record RemoteOrganizationRequest(
-        String organizationName,
-        String organizationType,
-        Long iamUserId,
-        String firstName,
-        String lastName
+        String name,
+        String type,
+        String email
 ) {
 }

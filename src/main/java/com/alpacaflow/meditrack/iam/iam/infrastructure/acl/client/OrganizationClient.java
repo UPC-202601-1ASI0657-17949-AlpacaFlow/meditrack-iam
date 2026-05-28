@@ -10,10 +10,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 @FeignClient(name = "organization-service", url = "${organization.facade.url}")
 public interface OrganizationClient {
 
-    @GetMapping("/api/v1/organizations/availability")
-    boolean checkNameAvailability(@RequestParam("name") String name);
-
     // Mapea el endpoint real del microservicio Organization que reciba los datos para crear la institución y su administrador
-    @PostMapping("/api/v1/organizations/with-admin")
-    Long createRemoteOrganization(@RequestBody RemoteOrganizationRequest request);
+    @PostMapping("/api/v1/organizations")
+    void createRemoteOrganization(@RequestBody RemoteOrganizationRequest request);
 }

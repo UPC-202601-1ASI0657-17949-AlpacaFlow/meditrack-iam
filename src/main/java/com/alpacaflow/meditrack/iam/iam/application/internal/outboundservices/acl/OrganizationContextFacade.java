@@ -9,28 +9,11 @@ import java.util.Optional;
 public interface OrganizationContextFacade {
 
     /**
-     * Verifica si un nombre de organización ya está en uso o sigue disponible.
-     * * @param name Nombre de la organización a verificar.
-     * @return true si el nombre está disponible, false si ya existe.
+     * Envía la solicitud de creación de la organización remota.
      */
-    boolean isOrganizationNameAvailable(String name);
-
-    /**
-     * Busca una organización externa por su identificador único.
-     * * @param organizationId ID de la organización.
-     * @return un Optional con la organización externa si existe.
-     */
-    Optional<ExternalOrganization> fetchOrganizationById(Long organizationId);
-
-    /**
-     * Notifica la creación de un nuevo administrador y su organización en el contexto correspondiente.
-     * @return el ID de la organización creada de forma remota.
-     */
-    Long createOrganizationWithAdmin(
-            String organizationName,
-            String organizationType,
-            Long iamUserId,
-            String firstName,
-            String lastName
+    void createOrganization(
+            String name,
+            String type,
+            String email
     );
 }
