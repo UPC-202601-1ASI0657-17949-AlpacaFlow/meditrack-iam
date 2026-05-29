@@ -1,19 +1,19 @@
 package com.alpacaflow.meditrack.iam.iam.application.internal.outboundservices.acl;
 
-import java.util.Optional;
-
 /**
- * Port (Anti-Corruption Layer) utilizado por el microservicio IAM para comunicarse con el
- * Bounded Context de Organization de forma aislada.
+ * Port (Anti-Corruption Layer) used by IAM to communicate with the Organization bounded context.
  */
 public interface OrganizationContextFacade {
 
     /**
-     * Envía la solicitud de creación de la organización remota.
+     * Creates the organization and its admin profile in the Organization microservice.
      */
-    void createOrganization(
-            String name,
-            String type,
+    void registerOrganizationWithAdmin(
+            Long userId,
+            String firstName,
+            String lastName,
+            String organizationName,
+            String organizationType,
             String email
     );
 }

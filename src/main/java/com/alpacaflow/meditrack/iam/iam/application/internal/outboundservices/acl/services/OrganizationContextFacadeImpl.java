@@ -2,6 +2,7 @@ package com.alpacaflow.meditrack.iam.iam.application.internal.outboundservices.a
 
 import com.alpacaflow.meditrack.iam.iam.application.internal.outboundservices.acl.OrganizationContextFacade;
 import com.alpacaflow.meditrack.iam.iam.infrastructure.acl.client.OrganizationClient;
+import com.alpacaflow.meditrack.iam.iam.infrastructure.acl.client.RemoteAdminRequest;
 import com.alpacaflow.meditrack.iam.iam.infrastructure.acl.client.RemoteOrganizationRequest;
 import feign.FeignException;
 import org.springframework.context.annotation.Primary;
@@ -18,10 +19,22 @@ public class OrganizationContextFacadeImpl implements OrganizationContextFacade 
     }
 
     @Override
-    public void createOrganization(String name, String type, String email) {
-        var request = new RemoteOrganizationRequest(name, type, email);
+    public void registerOrganizationWithAdmin(
+            Long userId,
+            String firstName,
+            String lastName,
+            String organizationName,
+            String organizationType,
+            String email) {
+        var organizationRequest = new RemoteOrganizationRequest(organizationName, organizationType, email);
         try {
-            organizationClient.createRemoteOrganization(request);
+            var organization = organizationClient.createRemoteOrganization(organizationRequest);
+            organizationClient.createRemoteAdmin(new RemoteAdminRequest(
+                    organization.id(),
+                    userId,
+                    firstName,
+                    lastName
+            ));
         } catch (FeignException.Conflict e) {
             throw new RuntimeException("The organization name or email is already registered in the system.");
         } catch (FeignException e) {

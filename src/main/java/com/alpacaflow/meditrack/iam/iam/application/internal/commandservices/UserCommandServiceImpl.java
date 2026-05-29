@@ -118,7 +118,10 @@ public class UserCommandServiceImpl implements UserCommandService {
                 throw new RuntimeException("Organization type is required for admin sign-up");
             }
 
-            organizationContextFacade.createOrganization(
+            organizationContextFacade.registerOrganizationWithAdmin(
+                    savedUser.getId(),
+                    command.firstName(),
+                    command.lastName(),
                     command.organizationName(),
                     command.organizationType(),
                     command.email()

@@ -4,11 +4,12 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
-// "organization-service" es el nombre del microservicio o su URL configurada en Docker Compose
 @FeignClient(name = "organization-service", url = "${organization.facade.url}")
 public interface OrganizationClient {
 
-    // Mapea el endpoint real del microservicio Organization que reciba los datos para crear la institución y su administrador
     @PostMapping("/api/v1/organizations")
-    void createRemoteOrganization(@RequestBody RemoteOrganizationRequest request);
+    RemoteOrganizationResponse createRemoteOrganization(@RequestBody RemoteOrganizationRequest request);
+
+    @PostMapping("/api/v1/admins")
+    void createRemoteAdmin(@RequestBody RemoteAdminRequest request);
 }
