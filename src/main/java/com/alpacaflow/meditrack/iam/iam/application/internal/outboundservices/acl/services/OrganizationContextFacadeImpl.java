@@ -5,11 +5,11 @@ import com.alpacaflow.meditrack.iam.iam.infrastructure.acl.client.OrganizationCl
 import com.alpacaflow.meditrack.iam.iam.infrastructure.acl.client.RemoteAdminRequest;
 import com.alpacaflow.meditrack.iam.iam.infrastructure.acl.client.RemoteOrganizationRequest;
 import feign.FeignException;
-import org.springframework.context.annotation.Primary;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 
 @Service
-@Primary
+@ConditionalOnProperty(name = "app.organization.adapter", havingValue = "rest", matchIfMissing = true)
 public class OrganizationContextFacadeImpl implements OrganizationContextFacade {
 
     private final OrganizationClient organizationClient;
