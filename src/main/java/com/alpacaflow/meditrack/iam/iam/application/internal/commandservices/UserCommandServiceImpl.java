@@ -14,9 +14,10 @@ import com.alpacaflow.meditrack.iam.iam.infrastructure.repositories.UserReposito
 //import com.alpacaflow.meditrack.iam.organization.domain.services.AdminCommandService;
 //import com.alpacaflow.meditrack.iam.organization.domain.services.OrganizationCommandService;
 import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.util.Locale;
 import java.util.Optional;
@@ -118,7 +119,7 @@ public class UserCommandServiceImpl implements UserCommandService {
                 throw new RuntimeException("Organization type is required for admin sign-up");
             }
 
-            organizationContextFacade.registerOrganizationWithAdmin(
+            registerOrganizationWithAdminAfterCommit(
                     savedUser.getId(),
                     command.firstName(),
                     command.lastName(),
@@ -205,6 +206,33 @@ public class UserCommandServiceImpl implements UserCommandService {
         user.updateEmail(canonicalEmail);
         user.setPassword(hashingService.encode(canonicalEmail));
         userRepository.save(user);
+    }
+
+    /**
+     * Organization MS validates the admin user against IAM over HTTP. That lookup must run only
+     * after this sign-up transaction commits; otherwise the user id is not visible yet.
+     */
+    private void registerOrganizationWithAdminAfterCommit(
+            Long userId,
+            String firstName,
+            String lastName,
+            String organizationName,
+            String organizationType,
+            String email) {
+        Runnable registration = () -> organizationContextFacade.registerOrganizationWithAdmin(
+                userId, firstName, lastName, organizationName, organizationType, email);
+
+        if (TransactionSynchronizationManager.isSynchronizationActive()) {
+            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+                @Override
+                public void afterCommit() {
+                    registration.run();
+                }
+            });
+            return;
+        }
+
+        registration.run();
     }
 
     private static String normalizeEmail(String email) {
