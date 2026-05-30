@@ -1,7 +1,7 @@
 package com.alpacaflow.meditrack.iam.iam.interfaces.rest;
 
-import com.alpacaflow.meditrack.iam.iam.application.internal.outboundservices.acl.OrganizationContextFacade;
 import com.alpacaflow.meditrack.iam.iam.domain.model.commands.SignInCommand;
+import com.alpacaflow.meditrack.iam.iam.infrastructure.acl.client.OrganizationClient;
 import com.alpacaflow.meditrack.iam.iam.domain.services.UserCommandService;
 import com.alpacaflow.meditrack.iam.iam.interfaces.rest.resources.OrganizationNameAvailabilityResource;
 //import com.alpacaflow.meditrack.iam.organization.domain.services.OrganizationQueryService;
@@ -30,11 +30,21 @@ import org.springframework.web.bind.annotation.RestController;
 @Tag(name = "Authentication", description = "Available Authentication Endpoints")
 public class AuthenticationController {
     private final UserCommandService userCommandService;
+    private final OrganizationClient organizationClient;
 
     public AuthenticationController(
-            UserCommandService userCommandService
-            ) {
+            UserCommandService userCommandService,
+            OrganizationClient organizationClient) {
         this.userCommandService = userCommandService;
+        this.organizationClient = organizationClient;
+    }
+
+    @GetMapping("/organization-name-availability")
+    @Operation(summary = "Check organization name availability for sign-up")
+    @ApiResponse(responseCode = "200", description = "Availability result")
+    public ResponseEntity<OrganizationNameAvailabilityResource> checkOrganizationNameAvailability(
+            @RequestParam(required = false, defaultValue = "") String name) {
+        return ResponseEntity.ok(organizationClient.checkOrganizationNameAvailability(name));
     }
 
     @PostMapping("/sign-in")
