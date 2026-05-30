@@ -66,6 +66,7 @@ public class WebSecurityConfiguration {
                 .authorizeHttpRequests(authorizeRequests -> authorizeRequests
                         .requestMatchers(
                                 "/api/v1/authentication/**",
+                                "/api/v1/users/**",
                                 "/temp-api/v1/users/**", // Mock endpoints for dev
                                 "/v3/api-docs/**",
                                 "/swagger-ui/**",

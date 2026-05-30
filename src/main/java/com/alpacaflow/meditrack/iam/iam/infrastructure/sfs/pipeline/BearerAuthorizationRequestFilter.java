@@ -43,6 +43,7 @@ public class BearerAuthorizationRequestFilter extends OncePerRequestFilter {
         boolean publicAuth = path.startsWith("/api/v1/authentication/")
                     || path.contains("/api/v1/authentication/");
         if (publicAuth
+                || path.startsWith("/api/v1/users/")
                 || path.startsWith("/temp-api/")
                 || path.contains("/swagger-")
                 || path.startsWith("/swagger-ui")
