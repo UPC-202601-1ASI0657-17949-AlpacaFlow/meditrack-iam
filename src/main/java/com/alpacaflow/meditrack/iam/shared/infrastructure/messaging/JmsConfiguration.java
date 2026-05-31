@@ -11,16 +11,23 @@ import org.springframework.jms.support.converter.MappingJackson2MessageConverter
 import org.springframework.jms.support.converter.MessageConverter;
 import org.springframework.jms.support.converter.MessageType;
 
+import java.util.Map;
+
 @Configuration
 @EnableJms
 @ConditionalOnProperty(name = "app.messaging.enabled", havingValue = "true")
 public class JmsConfiguration {
+
+    private static final String ORGANIZATION_STAFF_PROVISION_REQUEST_TYPE =
+            "com.alpacaflow.meditrack.organization.shared.infrastructure.messaging.StaffProvisionRequestMessage";
 
     @Bean
     public MessageConverter jacksonJmsMessageConverter() {
         var converter = new MappingJackson2MessageConverter();
         converter.setTargetType(MessageType.TEXT);
         converter.setTypeIdPropertyName("_type");
+        converter.setTypeIdMappings(Map.of(
+                ORGANIZATION_STAFF_PROVISION_REQUEST_TYPE, StaffProvisionRequestMessage.class));
         return converter;
     }
 
