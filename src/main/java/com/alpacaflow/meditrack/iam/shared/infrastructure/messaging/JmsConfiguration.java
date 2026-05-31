@@ -1,5 +1,7 @@
 package com.alpacaflow.meditrack.iam.shared.infrastructure.messaging;
 
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.jms.ConnectionFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
@@ -11,6 +13,7 @@ import org.springframework.jms.support.converter.MappingJackson2MessageConverter
 import org.springframework.jms.support.converter.MessageConverter;
 import org.springframework.jms.support.converter.MessageType;
 
+import java.util.HashMap;
 import java.util.Map;
 
 @Configuration
@@ -18,16 +21,25 @@ import java.util.Map;
 @ConditionalOnProperty(name = "app.messaging.enabled", havingValue = "true")
 public class JmsConfiguration {
 
-    private static final String ORGANIZATION_STAFF_PROVISION_REQUEST_TYPE =
+    private static final String LEGACY_ORGANIZATION_STAFF_PROVISION_REQUEST_TYPE =
             "com.alpacaflow.meditrack.organization.shared.infrastructure.messaging.StaffProvisionRequestMessage";
 
     @Bean
     public MessageConverter jacksonJmsMessageConverter() {
+        var objectMapper = new ObjectMapper()
+                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+
         var converter = new MappingJackson2MessageConverter();
+        converter.setObjectMapper(objectMapper);
         converter.setTargetType(MessageType.TEXT);
         converter.setTypeIdPropertyName("_type");
-        converter.setTypeIdMappings(Map.of(
-                ORGANIZATION_STAFF_PROVISION_REQUEST_TYPE, StaffProvisionRequestMessage.class));
+
+        Map<String, Class<?>> typeIdMappings = new HashMap<>();
+        typeIdMappings.put(MessagingTypeIds.ADMIN_REGISTRATION_REQUEST, AdminRegistrationRequestedMessage.class);
+        typeIdMappings.put(MessagingTypeIds.STAFF_PROVISION_REQUEST, StaffProvisionRequestMessage.class);
+        typeIdMappings.put(MessagingTypeIds.STAFF_PROVISION_RESPONSE, StaffProvisionResponseMessage.class);
+        typeIdMappings.put(LEGACY_ORGANIZATION_STAFF_PROVISION_REQUEST_TYPE, StaffProvisionRequestMessage.class);
+        converter.setTypeIdMappings(typeIdMappings);
         return converter;
     }
 
