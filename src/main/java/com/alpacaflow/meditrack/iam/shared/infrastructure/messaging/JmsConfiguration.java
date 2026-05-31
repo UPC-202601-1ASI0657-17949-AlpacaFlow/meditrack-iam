@@ -36,6 +36,7 @@ public class JmsConfiguration {
 
         Map<String, Class<?>> typeIdMappings = new HashMap<>();
         typeIdMappings.put(MessagingTypeIds.ADMIN_REGISTRATION_REQUEST, AdminRegistrationRequestedMessage.class);
+        typeIdMappings.put(MessagingTypeIds.RELATIVE_REGISTRATION_REQUEST, RelativeRegistrationRequestedMessage.class);
         typeIdMappings.put(MessagingTypeIds.STAFF_PROVISION_REQUEST, StaffProvisionRequestMessage.class);
         typeIdMappings.put(MessagingTypeIds.STAFF_PROVISION_RESPONSE, StaffProvisionResponseMessage.class);
         typeIdMappings.put(LEGACY_ORGANIZATION_STAFF_PROVISION_REQUEST_TYPE, StaffProvisionRequestMessage.class);

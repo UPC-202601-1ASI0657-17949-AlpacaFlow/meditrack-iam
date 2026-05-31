@@ -1,6 +1,7 @@
 package com.alpacaflow.meditrack.iam.iam.application.internal.commandservices;
 
 import com.alpacaflow.meditrack.iam.iam.application.internal.outboundservices.acl.OrganizationContextFacade;
+import com.alpacaflow.meditrack.iam.iam.application.internal.outboundservices.acl.RelativesContextFacade;
 import com.alpacaflow.meditrack.iam.iam.application.internal.outboundservices.hashing.HashingService;
 import com.alpacaflow.meditrack.iam.iam.application.internal.outboundservices.tokens.TokenService;
 import com.alpacaflow.meditrack.iam.iam.domain.model.aggregates.User;
@@ -35,6 +36,7 @@ public class UserCommandServiceImpl implements UserCommandService {
     private final HashingService hashingService;
     private final TokenService tokenService;
     private final OrganizationContextFacade organizationContextFacade;
+    private final RelativesContextFacade relativesContextFacade;
 
     /**
      * Constructor of the class.
@@ -48,12 +50,14 @@ public class UserCommandServiceImpl implements UserCommandService {
             UserRepository userRepository, 
             HashingService hashingService, 
             TokenService tokenService,
-            OrganizationContextFacade organizationContextFacade
+            OrganizationContextFacade organizationContextFacade,
+            RelativesContextFacade relativesContextFacade
             ) {
         this.userRepository = userRepository;
         this.hashingService = hashingService;
         this.tokenService = tokenService;
         this.organizationContextFacade = organizationContextFacade;
+        this.relativesContextFacade = relativesContextFacade;
     }
 
     /**
@@ -128,6 +132,13 @@ public class UserCommandServiceImpl implements UserCommandService {
                     command.email()
             );
 
+        } else if ("relative".equalsIgnoreCase(command.role())) {
+            registerRelativeAfterCommit(
+                    savedUser.getId(),
+                    normalizedEmail,
+                    command.firstName(),
+                    command.lastName()
+            );
         }
         
         return Optional.of(savedUser);
@@ -233,6 +244,47 @@ public class UserCommandServiceImpl implements UserCommandService {
         }
 
         registration.run();
+    }
+
+    private void registerRelativeAfterCommit(
+            Long userId,
+            String email,
+            String firstName,
+            String lastName) {
+        var derivedNames = deriveRelativeNames(email, firstName, lastName);
+        Runnable registration = () -> relativesContextFacade.registerRelative(
+                userId,
+                email,
+                derivedNames.firstName(),
+                derivedNames.lastName());
+
+        if (TransactionSynchronizationManager.isSynchronizationActive()) {
+            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+                @Override
+                public void afterCommit() {
+                    registration.run();
+                }
+            });
+            return;
+        }
+
+        registration.run();
+    }
+
+    private static RelativeNameParts deriveRelativeNames(String email, String firstName, String lastName) {
+        if (firstName != null && !firstName.isBlank() && lastName != null && !lastName.isBlank()) {
+            return new RelativeNameParts(firstName.trim(), lastName.trim());
+        }
+        var localPart = email == null ? "user" : email.split("@")[0];
+        var nameParts = localPart.split("\\.");
+        var derivedFirstName = nameParts[0].isBlank() ? "Relative" : nameParts[0];
+        var derivedLastName = nameParts.length > 1 && !nameParts[1].isBlank()
+                ? String.join(" ", java.util.Arrays.copyOfRange(nameParts, 1, nameParts.length))
+                : "User";
+        return new RelativeNameParts(derivedFirstName, derivedLastName);
+    }
+
+    private record RelativeNameParts(String firstName, String lastName) {
     }
 
     private static String normalizeEmail(String email) {

@@ -6,6 +6,7 @@ package com.alpacaflow.meditrack.iam.shared.infrastructure.messaging;
 public final class MessagingTypeIds {
 
     public static final String ADMIN_REGISTRATION_REQUEST = "meditrack.AdminRegistrationRequest";
+    public static final String RELATIVE_REGISTRATION_REQUEST = "meditrack.RelativeRegistrationRequest";
     public static final String STAFF_PROVISION_REQUEST = "meditrack.StaffProvisionRequest";
     public static final String STAFF_PROVISION_RESPONSE = "meditrack.StaffProvisionResponse";
 
