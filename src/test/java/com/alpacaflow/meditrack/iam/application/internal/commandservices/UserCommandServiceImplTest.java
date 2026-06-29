@@ -3,6 +3,7 @@ package com.alpacaflow.meditrack.iam.application.internal.commandservices;
 import com.alpacaflow.meditrack.iam.iam.application.internal.commandservices.UserCommandServiceImpl;
 import com.alpacaflow.meditrack.iam.iam.application.internal.outboundservices.acl.OrganizationContextFacade;
 import com.alpacaflow.meditrack.iam.iam.application.internal.outboundservices.acl.RelativesContextFacade;
+import com.alpacaflow.meditrack.iam.iam.application.internal.outboundservices.hashing.HashingService;
 import com.alpacaflow.meditrack.iam.iam.application.internal.outboundservices.tokens.TokenService;
 import com.alpacaflow.meditrack.iam.iam.domain.model.aggregates.User;
 import com.alpacaflow.meditrack.iam.iam.domain.model.commands.CreateMockUserCommand;
